@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>红色岁月</title>
+		<link rel="stylesheet" href="styles.css">
+		<style>
+			* {
+				padding: 0;
+				margin: 0;
+			}
+
+			body {
+				background-image: url("1.jpg");
+				font: 1em/1.5 Rubik, sans-serif;
+				display: flex;
+
+
+			}
+
+
+			/* 设置所有文本元素的字体为宋体 */
+			body,
+			h1,
+			h2,
+			h3,
+			h4,
+			h5,
+			h6,
+			p,
+			div,
+			span,
+			small
+
+			/* ...以及其他所有您希望应用样式的元素 */
+				{
+				font-family: "SimSun", "宋体", serif;
+				/* 首选宋体，如果不可用则使用其他备选字体 */
+			}
+
+
+
+
+			.navbar {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				background-color: rgb(200, 130, 100);
+				padding: 10px;
+				font-family: SimSun, serif;
+				font-weight: bold;
+				overflow: hidden;
+				position: fixed;
+				top: 0;
+				width: 100%;
+				z-index: 999;
+
+			}
+
+			.nav-link {
+				color: white;
+				/* 链接文字颜色为白色 */
+				text-decoration: none;
+				margin-right: 25px;
+				/* 链接之间的间距 */
+			}
+
+			.nav-link:hover {
+				color: #ffeec0;
+				/* 悬停时更改链接颜色 */
+
+			}
+
+			.navbar-right ul {
+				display: flex;
+				/* 确保列表项水平排列 */
+				align-items: center;
+				/* 垂直居中列表项 */
+				list-style: none;
+				/* 移除列表标记 */
+				padding: 10;
+				/* 移除默认的内边距 */
+			}
+
+			.navbar-left span {
+				color: white;
+				font-size: 27px;
+
+			}
+
+
+			/* 时钟容器样式 */
+			.clock {
+				--hrAngle: 0;
+				--minAngle: 0;
+				--secAngle: 0;
+				border-radius: 50%;
+				margin: auto;
+				outline: transparent;
+				position: relative;
+				width: 20em;
+				height: 20em;
+				transform: rotateX(30deg) rotateY(-30deg) rotateZ(30deg);
+				transform-style: preserve-3d;
+				transition: transform 0.3s cubic-bezier(0.42, 0, 0.58, 1);
+			}
+
+			/* 时钟头像样式 */
+			.profile {
+				border: 0;
+				border-radius: 50%;
+				box-shadow: 0 0 0 0.25em hsla(26, 87%, 39%, 0.6);
+				display: block;
+				margin: 7.75em auto 0 auto;
+				width: 4em;
+				height: 4em;
+				background: url("img/front.png") 0 0 / 100% 100%;
+			}
+
+			/* 鼠标悬停时钟样式 */
+			.clock:focus-visible,
+			.clock:hover {
+				transform: rotateX(0) rotateY(0) rotateZ(0);
+			}
+
+			/* 时钟数字容器样式 */
+			.digits {
+				display: flex;
+				justify-content: center;
+				align-items: end;
+				line-height: 1;
+				margin-top: 2.25em;
+				user-select: none;
+				font-weight: bold;
+				color: white;
+			}
+
+			/* 时钟数字组样式 */
+			.digit-group {
+				margin: 0 0.1em;
+				width: 2ch;
+			}
+
+			.digit-group[data-unit="h"] {
+				text-align: right;
+			}
+
+			.digit-group--small {
+				font-size: 0.75em;
+			}
+
+			/* 时钟指针、层和环样式 */
+			.hand,
+			.layer,
+			.ring {
+				position: absolute;
+
+			}
+
+			/* 时钟指针样式 */
+			.hand {
+				bottom: calc(50% - 0.5em);
+				left: calc(50% - 0.5em);
+				width: 1em;
+				mix-blend-mode: difference;
+				perspective: 4.25em;
+				transform-origin: 0.5em calc(100% - 0.5em);
+				transition: .5s;
+				rgb(200, 130, 100)
+			}
+
+			.hand--hr {
+				height: 4.75em;
+				transform: rotate(var(--hrAngle)) translateY(-2em);
+			}
+
+			.hand--min {
+				height: 5.25em;
+				transform: rotate(var(--minAngle)) translateY(-2em);
+			}
+
+			.hand--sec {
+				width: .5em;
+				height: 3.75em;
+				transform: rotate(var(--secAngle)) translateY(-2em);
+			}
+
+			.hand:before {
+				background-color: hsl(0, 0%, 100%);
+				content: "";
+				display: block;
+				width: 100%;
+				height: 100%;
+				transform: rotateX(-30deg);
+				transform-origin: 50% 100%;
+			}
+
+			.hand--hr:before {
+				border-radius: 0.5em 0.5em 0.5em 0.5em / 0.5em 0.5em 0.75em 0.75em;
+			}
+
+			.hand--min:before {
+				border-radius: 0 0 0.5em 0.5em / 0 0 0.75em 0.75em;
+			}
+
+			.hand--sec:before {
+				border-radius: 0 0 0.25em 0.25em / 0 0 0.5em 0.5em;
+			}
+
+			.layer,
+			.ring {
+				border-radius: 50%;
+				inset: 0;
+			}
+
+			/* 时钟表盘层样式 */
+			.layer--face {
+				transform: translateZ(3.75em);
+			}
+
+			.layer--img {
+				background: url("img/0000.jpg") 0 0 / 100% 100%;
+				transform: translateZ(-3.75em);
+			}
+
+			.layer--profile {
+				transform: translateZ(11em);
+			}
+
+			/* 时钟遮罩层样式 */
+			.layer--shade {
+				background-color: rgb(200, 130, 100);
+			}
+
+			.ring {
+				box-shadow: 0 0 0 0.625em hsl(0, 0%, 100%) inset;
+			}
+
+
+
+
+
+			/*时间轴*/
+
+			.shell {
+				width: 100%;
+				position: relative;
+				padding: 80px 0;
+				transition: 0.3s ease 0s;
+				background-attachment: fixed;
+				background-size: cover;
+			}
+
+			.shell:before {
+				position: absolute;
+				left: 0;
+				top: 0;
+				width: 100%;
+				height: 100%;
+				background: rgba(99, 99, 99, 0.8);
+				content: "";
+			}
+
+			.header {
+				width: 100%;
+				text-align: center;
+				margin-bottom: 80px;
+				position: relative;
+			}
+
+			.title {
+				color: #fff;
+				font-size: 46px;
+				font-weight: normal;
+				margin: 0;
+				font-family: "SimSun", "宋体", serif;
+			}
+
+			.timeline {
+				display: flex;
+				margin: 0 auto;
+				flex-wrap: wrap;
+				flex-direction: column;
+				max-width: 700px;
+				position: relative;
+			}
+
+			.content-title {
+				font-weight: normal;
+				font-size: 66px;
+				margin: -10px 0 0 0;
+				transition: 0.4s;
+				padding: 0 10px;
+				box-sizing: border-box;
+				color: #fff;
+				font-family: "SimSun", "宋体", serif;
+			}
+
+			.content-desc {
+				margin: 0;
+				font-size: 15px;
+				box-sizing: border-box;
+				color: rgba(255, 255, 255, 0.7);
+				line-height: 25px;
+				font-family: "SimSun", "宋体", serif;
+			}
+
+			.timeline:before {
+				position: absolute;
+				left: 50%;
+				width: 2px;
+				height: 100%;
+				margin-left: -1px;
+				content: "";
+				background: rgba(255, 255, 255, 0.07);
+			}
+
+			.item {
+				padding: 40px 0;
+				opacity: 0.3;
+				filter: blur(2px);
+				transition: 0.5s;
+				box-sizing: border-box;
+				width: calc(50% - 40px);
+				display: flex;
+				position: relative;
+				transform: translateY(-80px);
+				font-family: "SimSun", "宋体", serif;
+			}
+
+			.item:before {
+				content: attr(data-text);
+				letter-spacing: 3px;
+				width: 100%;
+				position: absolute;
+				color: rgba(255, 255, 255, 0.5);
+				font-size: 13px;
+				border-left: 2px solid rgba(255, 255, 255, 0.5);
+				top: 70%;
+				margin-top: -5px;
+				padding-left: 15px;
+				opacity: 0;
+				right: calc(-100% - 56px);
+				font: 900 20px '';
+				letter-spacing: 5px;
+				font-family: "SimSun", "宋体", serif;
+			}
+
+			.item:nth-child(even) {
+				align-self: flex-end;
+			}
+
+			.item:nth-child(even):before {
+				right: auto;
+				text-align: right;
+				left: calc(-100% - 56px);
+				padding-left: 0;
+				border-left: none;
+				border-right: 2px solid rgba(255, 255, 255, 0.5);
+				padding-right: 15px;
+			}
+
+			.item--active {
+				opacity: 1;
+				transform: translateY(0);
+				filter: blur(0px);
+			}
+
+			.item--active:before {
+				top: 50%;
+				transition: 0.3s all 0.2s;
+				opacity: 1;
+			}
+
+			.item--active .content-title {
+				margin: -50px 0 20px 0;
+			}
+
+			.img {
+				max-width: 100%;
+				box-shadow: 0 10px 15px rgba(0, 0, 0, 0.4);
+			}
+
+			.subtitle {
+				color: rgba(255, 255, 255, 0.5);
+				font-size: 16px;
+				letter-spacing: 5px;
+				margin: 10px 0 0 0;
+				font-weight: normal;
+				font-family: "SimSun", "宋体", serif;
+			}
+
+			.footer {
+				padding: 95px 0;
+				text-align: center;
+				font-family: "SimSun", "宋体", serif;
+			}
+
+			.footer a {
+				color: #999;
+				display: inline-block;
+				font-family: "SimSun", "宋体", serif;
+			}
+
+			@media only screen and (max-width: 767px) {
+				.item {
+					align-self: baseline !important;
+					width: 100%;
+					padding: 0 30px 150px 80px;
+					font-family: "SimSun", "宋体", serif;
+				}
+
+				.item:before {
+					left: 10px !important;
+					padding: 0 !important;
+					top: 50px;
+					text-align: center !important;
+					width: 60px;
+					border: none !important;
+					font-family: "SimSun", "宋体", serif;
+				}
+
+				.item:last-child {
+					padding-bottom: 40px;
+					font-family: "SimSun", "宋体", serif;
+				}
+			}
+
+			@media only screen and (max-width: 767px) {
+				.timeline:before {
+					left: 40px;
+				}
+			}
+
+			.zoom-on-hover {
+				/* 原始大小 */
+				width: 100%;
+				/* 你可以设置你需要的原始大小 */
+				height: auto;
+				/* 保持图片的原始宽高比 */
+				transition: transform 0.3s ease-in-out;
+				/* 添加过渡效果 */
+			}
+
+			.zoom-on-hover:hover {
+				/* 鼠标移到图片上时放大 */
+				transform: scale(1.5);
+				/* 放大到原始大小的-倍 */
+			}
+		</style>
+	</head>
+
+	<body>
+
+
+		<nav class="navbar">
+			<div class="navbar-left">
+				<span>红色影像馆</span>
+			</div>
+			<div class="navbar-right">
+				<ul>
+					<li><a class="nav-link" href="lb.html">红船建党</a></li>
+					<li><a class="nav-link" href="lb2.html">井冈山故事</a></li>
+					<li><a class="nav-link" href="lb3.html">长征精神</a></li>
+					<li><a class="nav-link" href="lb4.html">新中国成立</a></li>
+					<li><a class="nav-link" href="lb5.html">我们的时代</a></li>
+				</ul>
+			</div>
+		</nav>
+
+
+
+		<div class="shell" id="shell">
+
+			<!-- 时钟 -->
+			<div class="clock">
+				<div class="layer layer--img"></div>
+				<div class="layer layer--shade"></div>
+				<div class="layer layer--face">
+					<div class="digits">
+						<span class="digit-group" data-unit="h">12</span>
+						<span>:</span>
+						<span class="digit-group" data-unit="m">00</span>
+						<small class="digit-group digit-group--small" data-unit="s">00</small>
+						<small class="digit-group digit-group--small" data-unit="ap">A</small>
+					</div>
+					<div class="hand hand--hr"></div>
+					<div class="hand hand--min"></div>
+					<div class="hand hand--sec"></div>
+					<div class="ring"></div>
+				</div>
+				<div class="layer layer--profile">
+					<img src="1.jpg" alt="" class="profile">
+				</div>
+			</div>
+
+			<!-- 标题 -->
+
+			<div class="header">
+				<h2 class="title">红色的时代</h2>
+				<h3 class="subtitle">我们生长在红旗下，长在春风里</h3>
+			</div>
+
+			<!-- 时间轴-->
+			<div class="timeline">
+				<div class="item" data-text="红船建党">
+					<div class="content">
+						<img src="./img/00.jpg" class="img  zoom-on-hover" id="image1" alt="图片1">
+						<h2 class="content-title">1921</h2>
+						<p class="content-desc">
+							南湖红船，见证中国共产党的诞生
+						</p>
+					</div>
+				</div>
+
+				<div class="item" data-text="井冈山故事">
+					<div class="content">
+						<img src="./img/200.jpg" class="img zoom-on-hover" id="image2" alt="图片2">
+						<h2 class="content-title">1928</h2>
+						<p class="content-desc">
+							星星之火，可以燎原
+						</p>
+					</div>
+				</div>
+
+				<div class="item" data-text="长征精神">
+					<div class="content">
+						<img src="./img/300.jpg" class="img zoom-on-hover" id="image3" s alt="图片3">
+						<h2 class="content-title">1935</h2>
+						<p class="content-desc">
+							人类历史的奇迹——二万五千里长征
+						</p>
+					</div>
+				</div>
+
+        <div class="item" data-text="新中国成立">
+          <div class="content">
+            <img src="./img/400.jpg" class="img zoom-on-hover" id="image4" s alt="图片4">
+            <h2 class="content-title">1949</h2>
+            <p class="content-desc">
+              中华人民共和国中央人民政府，今天，成立了！
+            </p>
+          </div>
+        </div>
+
+        <div class="item" data-text="我们的时代">
+          <div class="content">
+            <img src="./img/500.jpg" class="img zoom-on-hover" id="image5" s alt="图片5">
+            <h2 class="content-title">00后</h2>
+            <p class="content-desc">
+              时代在变，我们的征途是星辰大海
+            </p>
+          </div>
+        </div>
+
+
+			</div>
+		</div>
+
+
+
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+		<script>
+			(function($) {
+				$.fn.timeline = function() {
+					var selectors = {
+						id: $(this),
+						item: $(this).find(".item"),
+						activeClass: "item--active",
+						img: ".img"
+					};
+					// 将第一个时间轴项目激活，并设置时间轴背景图片为第一个项目的图片
+					selectors.item.eq(0).addClass(selectors.activeClass);
+					selectors.id.css(
+						"background-image",
+						"url(" +
+						selectors.item.first()
+						.find(selectors.img)
+						.attr("src") +
+						")"
+					);
+					// 获取时间轴项目的总数
+					var itemLength = selectors.item.length;
+					// 当页面滚动时，触发滚动事件
+					$(window).scroll(function() {
+						var max, min;
+						// 获取页面滚动的距离
+						var pos = $(this).scrollTop();
+						selectors.item.each(function(i) {
+							// 获取当前时间轴项目的最小和最大高度
+							min = $(this).offset().top;
+							max = $(this).height() + $(this).offset().top;
+							var that = $(this);
+							// 如果滚动到最后一个项目，并且超过了当前项目高度的一半，
+							// 则将最后一个项目设置为激活状态，并设置背景图片为最后一个项目的图片
+							if (i == itemLength - 2 && pos > min + $(this).height() / 2) {
+								selectors.item.removeClass(selectors.activeClass);
+								selectors.id.css(
+									"background-image",
+									"url(" +
+									selectors.item.last()
+									.find(selectors.img)
+									.attr("src") +
+									")"
+								);
+								selectors.item.last().addClass(selectors.activeClass);
+							}
+							// 如果当前滚动位置在当前项目的最小和最大高度之间，
+							// 则将当前项目设置为激活状态，并设置背景图片为当前项目的图片
+							else if (pos <= max - 10 && pos >= min) {
+								selectors.id.css(
+									"background-image",
+									"url(" +
+									$(this)
+									.find(selectors.img)
+									.attr("src") +
+									")"
+								);
+								selectors.item.removeClass(selectors.activeClass);
+								$(this).addClass(selectors.activeClass);
+							}
+						});
+					});
+				};
+			})(jQuery)
+			/*
+			最后，我们调用 timeline 插件并传入时间轴的 ID 作为参数。
+			这将启用时间轴插件并为该时间轴绑定滚动事件。
+			*/
+			$("#shell").timeline();
+		</script>
+	</body>
+
+	<script>
+		// 页面加载完成后执行初始化操作
+		window.addEventListener("DOMContentLoaded", () => {
+			const c = new Clock7(".clock");
+		});
+
+		// 时钟类定义
+		class Clock7 {
+			constructor(el) {
+				this.el = document.querySelector(el);
+				this.init();
+			}
+			// 初始化函数
+			init() {
+				this.timeUpdate();
+			}
+			// 获取当前时间对象
+			get timeAsObject() {
+				const date = new Date();
+				let h = date.getHours();
+				const m = date.getMinutes();
+				const s = date.getSeconds();
+				return {
+					h,
+					m,
+					s
+				};
+			}
+			// 获取当前时间字符串
+			get timeAsString() {
+				const [h, m, s, ap] = this.timeDigitsGrouped;
+				return `${h}:${m}:${s} ${ap}M`;
+			}
+			// 获取当前时间数字组
+			get timeDigitsGrouped() {
+				let {
+					h,
+					m,
+					s
+				} = this.timeAsObject;
+				const ap = h > 11 ? "P" : "A";
+				if (h === 0) h += 12;
+				else if (h > 12) h -= 12;
+				if (m < 10) m = `0${m}`;
+				if (s < 10) s = `0${s}`;
+				return [h, m, s, ap];
+			}
+			// 更新时间显示
+			timeUpdate() {
+				this.el?.setAttribute("aria-label", this.timeAsString);
+				const time = this.timeAsObject;
+				const secFraction = time.s / 60;
+				const minFraction = (time.m + secFraction) / 60;
+				const hrFraction = (time.h + minFraction) / 12;
+				this.el?.style.setProperty("--secAngle", `${360 * secFraction}deg`);
+				this.el?.style.setProperty("--minAngle", `${360 * minFraction}deg`);
+				this.el?.style.setProperty("--hrAngle", `${360 * hrFraction}deg`);
+				Array.from(document.querySelectorAll(`[data-unit]`)).forEach((unit, i) => {
+					unit.innerText = this.timeDigitsGrouped[i];
+				})
+				clearTimeout(this.timeUpdateLoop);
+				this.timeUpdateLoop = setTimeout(this.timeUpdate.bind(this), 1e3);
+			}
+		}
+
+
+		document.addEventListener('DOMContentLoaded', (event) => {
+			// 为每个图片元素添加点击事件监听器
+			const image1 = document.getElementById('image1');
+			const image2 = document.getElementById('image2');
+			const image3 = document.getElementById('image3');
+      const image4 = document.getElementById('image4');
+      const image5 = document.getElementById('image5');
+
+			// 设置图片1的点击事件
+			image1.addEventListener('click', function() {
+				window.location.href = 'lb.html'; // 图片1对应的跳转网址
+			});
+
+			// 设置图片2的点击事件
+			image2.addEventListener('click', function() {
+				window.location.href = 'lb2.html'; // 图片2对应的跳转网址
+			});
+
+			// 设置图片3的点击事件
+			image3.addEventListener('click', function() {
+				window.location.href = 'lb3.html'; // 图片3对应的跳转网址
+			});
+
+      // 设置图片3的点击事件
+      image4.addEventListener('click', function() {
+        window.location.href = 'lb4.html'; // 图片3对应的跳转网址
+      });
+
+      image5.addEventListener('click', function() {
+        window.location.href = 'lb5.html'; // 图片3对应的跳转网址
+      });
+		});
+
+
+
+
+
+
+	</script>
+
+
+
+</html>
